@@ -82,14 +82,6 @@ def contained_indexes(filename, lon, lat):
                 contained_indexs.append((x,y))
                 
     return np.array(contained_indexs)
-
-    
-    
-    
-    
-    
-    
-    
     
     
     
