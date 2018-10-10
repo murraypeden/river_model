@@ -3,15 +3,16 @@ import bs4
 import urllib.request as url
 import imageio
 import os
-import datetime
+import datetime as dt
 import traceback
 import shapefile as shp
 import matplotlib.path as pth
+import json
+from secret import METOFFICE_KEY
 
-
-def update():
+def update_radar_images():
     """
-       Calling update() will automatically download the Metoffice INSPIRE 
+       Calling update_radar_images() will automatically download the Metoffice INSPIRE 
        rainfall radar images for scotland at a zoom level of 2 and store them 
        in the "rainfall_images" directory as .grd.gz files.  An example of the
        file name is: radar_image_zoom_2_2018-10-08T00-00-00Z.grd.gz 
@@ -47,9 +48,8 @@ def update():
     
     #Useful strings.
     path = os.getcwd() + '\\rainfall_images\\'
-    key = "598ca851-5617-4142-a187-7593fb22ea38"
-    capabilities_url = "http://datapoint.metoffice.gov.uk/public/data/inspire/view/wmts?REQUEST=getcapabilities&key=" + key 
-    request_url = "http://datapoint.metoffice.gov.uk/public/data/inspire/view/wmts?REQUEST=gettile&LAYER=RADAR_UK_Composite_Highres&FORMAT=image/png&TILEMATRIXSET=EPSG:27700&TILEMATRIX=EPSG:27700:{0}&TILEROW={1}&TILECOL={2}&TIME={3}&STYLE=Bitmap%20Interpolated%201km%20Blue-Pale%20blue%20gradient%200.25%20to%2032mm%2Fhr&key=" + key
+    capabilities_url = "http://datapoint.metoffice.gov.uk/public/data/inspire/view/wmts?REQUEST=getcapabilities&key=" + METOFFICE_KEY
+    request_url = "http://datapoint.metoffice.gov.uk/public/data/inspire/view/wmts?REQUEST=gettile&LAYER=RADAR_UK_Composite_Highres&FORMAT=image/png&TILEMATRIXSET=EPSG:27700&TILEMATRIX=EPSG:27700:{0}&TILEROW={1}&TILECOL={2}&TIME={3}&STYLE=Bitmap%20Interpolated%201km%20Blue-Pale%20blue%20gradient%200.25%20to%2032mm%2Fhr&key=" + METOFFICE_KEY
     header = 'ncols 768\nnrows 1024\nxllcorner 1393.0196\nyllcorner 597350.76252\ncellsize 618.09012\nNODATA_value -9999\n'
     
     #If no folder exists create one.
@@ -90,13 +90,13 @@ def update():
                 #Write error report.
                 with open(path + 'error_report_{}.txt'.format(filename), 'w') as f:
                     f.write('Error creating file {0}'.format(filename + extention))
-                    f.write('Error occured at {}.\n\n'.format(str(datetime.datetime.now())))
+                    f.write('Error occured at {}.\n\n'.format(str(dt.datetime.now())))
                     f.write(traceback.format_exc())
         
 
-def get(filename):
+def get_rainfall_grids(filename):
     """
-       get(filename) returns the rainfall radar image of a given filename.
+       get_rainfall_grids(filename) returns the rainfall radar image of a given filename.
     """
     return np.loadtxt(filename, skiprows=7)
 
@@ -141,6 +141,22 @@ def contained_indexes(filename, lon, lat):
                 contained_indexs.append((x,y))
                 
     return np.array(contained_indexs)
+
+#def get_SEPA_obs(code="115343"):
+    
+code="115343"
+sepa_url = "https://apps.sepa.org.uk/rainfall/api/Hourly/" + code
+
+sepa = url.urlopen(sepa_url)
+data = json.load(sepa)
+
+times = []
+rainfall = []
+    
+for item in data:
+    times.append(dt.datetime.strptime(item['Timestamp'], '%d/%m/%Y %H:%M:%S'))
+    rainfall.append(float(item['Value']))
+
 
     
     
