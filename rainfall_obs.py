@@ -142,22 +142,24 @@ def contained_indexes(filename, lon, lat):
                 
     return np.array(contained_indexs)
 
-#def get_SEPA_obs(code="115343"):
+def get_SEPA_obs(code="115343"):
+    """
+       This gets the latest hourly rainfall totals for a SEPA rainfall gauge.
+       The default station is the Glen Nevis station.
+    """
+    sepa_url = "https://apps.sepa.org.uk/rainfall/api/Hourly/" + code
     
-code="115343"
-sepa_url = "https://apps.sepa.org.uk/rainfall/api/Hourly/" + code
-
-sepa = url.urlopen(sepa_url)
-data = json.load(sepa)
-
-times = []
-rainfall = []
+    sepa = url.urlopen(sepa_url)
+    data = json.load(sepa)
     
-for item in data:
-    times.append(dt.datetime.strptime(item['Timestamp'], '%d/%m/%Y %H:%M:%S'))
-    rainfall.append(float(item['Value']))
+    times = []
+    rainfall = []
+        
+    for item in data:
+        times.append(dt.datetime.strptime(item['Timestamp'], '%d/%m/%Y %H:%M:%S'))
+        rainfall.append(float(item['Value']))
 
-
+    return times, rainfall
     
     
     

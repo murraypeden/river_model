@@ -73,8 +73,6 @@ def get_weatherbit(lon=-5.105218, lat=56.819817):
         
     return times, rainfall
 
-times, P = get_weatherbit()
-
 
 
 
